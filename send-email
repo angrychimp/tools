@@ -53,21 +53,17 @@ my $headers = "Return-Path: %%RETURN_PATH%%\r\n" .
               "Content-Type: multipart/alternative;\r\n" .
               "    boundary=\"%%MIME_BOUNDARY%%\"\r\n\r\n" .
               "--%%MIME_BOUNDARY%%\r\n" .
-              "Content-Type: text/plain; charset=\"utf-8\"\r\n" .
+              "Content-Type: text/html; charset=\"utf-8\"\r\n" .
               "Content-Disposition: inline\r\n\r\n";
 
 my $content = <<EOF;
-Duis aenean lacus voluptatem sit sagittis fusce, ac nec pede ut wisi.
-
-Nisl quis donec suscipit aliquet non, lacus ut, enim mi magna turpis, non sed quam vel id, vestibulum donec fermentum accumsan. Id nonummy nunc accumsan congue, risus integer velit dolor neque mattis. Sociis vel duis tristique sit, vel porttitor nulla dictumst, est et lacinia, amet risus hymenaeos consequat nulla tempus. Nunc augue luctus viverra id ut, volutpat dui natoque, a necessitatibus sem eget integer tincidunt amet.
-
-Scelerisque vulputate a sit dui, ad metus, parturient mauris etiam nunc vehicula morbi id, tempus turpis nonummy purus, torquent nunc at nibh quis. Nunc aliquam, aenean wisi sit ante, porta luctus ut neque sem sit fusce. Nunc augue luctus viverra id ut, volutpat dui natoque, a necessitatibus sem eget integer tincidunt amet. Posuere malesuada vestibulum nec mus mauris nonummy, ultricies ut cras, lacinia massa, aenean quam vel lacinia phasellus, lacinia eget pede a dictum ante.
-
-Arcu in aliquam aliquam tempus, tempus at senectus amet, sed faucibus sit donec, a suscipit egestas fringilla nunc. Arcu in aliquam aliquam tempus, tempus at senectus amet, sed faucibus sit donec, a suscipit egestas fringilla nunc. Ut fringilla tortor pharetra, diam pharetra dolor vehicula nostra erat massa. Libero explicabo dictum interdum, nulla sed a scelerisque vitae nec lectus.
-
-Neque dolore tortor massa iste, tempus orci ut blandit, tempor nisl non cras, vitae consectetuer id. Eu sollicitudin. Phasellus arcu in, nulla feugiat non netus facilisi, ornare vitae gravida. Donec luctus porttitor.
-
-Pretium volutpat arcu praesent hac, fames eget venenatis ligula euismod nunc quis. Rhoncus pellentesque etiam quis sapien sed, vestibulum luctus arcu ridiculus at, pellentesque ipsum velit, posuere sed porttitor in consectetuer, sed tincidunt sagittis blandit ullamcorper ut vitae.
+<p>Duis aenean lacus voluptatem sit sagittis fusce, ac nec pede ut wisi.<br/>
+Nisl quis donec suscipit aliquet non, lacus ut, enim mi magna turpis, non sed quam vel id, vestibulum donec fermentum accumsan. Id nonummy nunc accumsan congue, risus integer velit dolor neque mattis. Sociis vel duis tristique sit, vel porttitor nulla dictumst, est et lacinia, amet risus hymenaeos consequat nulla tempus. Nunc augue luctus viverra id ut, volutpat dui natoque, a necessitatibus sem eget integer tincidunt amet.<br/>
+Scelerisque vulputate a sit dui, ad metus, parturient mauris etiam nunc vehicula morbi id, tempus turpis nonummy purus, torquent nunc at nibh quis. Nunc aliquam, aenean wisi sit ante, porta luctus ut neque sem sit fusce. Nunc augue luctus viverra id ut, volutpat dui natoque, a necessitatibus sem eget integer tincidunt amet. Posuere malesuada vestibulum nec mus mauris nonummy, ultricies ut cras, lacinia massa, aenean quam vel lacinia phasellus, lacinia eget pede a dictum ante.<br/>
+Arcu in aliquam aliquam tempus, tempus at senectus amet, sed faucibus sit donec, a suscipit egestas fringilla nunc. Arcu in aliquam aliquam tempus, tempus at senectus amet, sed faucibus sit donec, a suscipit egestas fringilla nunc. Ut fringilla tortor pharetra, diam pharetra dolor vehicula nostra erat massa. Libero explicabo dictum interdum, nulla sed a scelerisque vitae nec lectus.<br/>
+Neque dolore tortor massa iste, tempus orci ut blandit, tempor nisl non cras, vitae consectetuer id. Eu sollicitudin. Phasellus arcu in, nulla feugiat non netus facilisi, ornare vitae gravida. Donec luctus porttitor.<br/>
+Pretium volutpat arcu praesent hac, fames eget venenatis ligula euismod nunc quis. Rhoncus pellentesque etiam quis sapien sed, vestibulum luctus arcu ridiculus at, pellentesque ipsum velit, posuere sed porttitor in consectetuer, sed tincidunt sagittis blandit ullamcorper ut vitae.<br/>
+</p>
 EOF
 
 my $footer = "\n\n--%%MIME_BOUNDARY%%--\n";
