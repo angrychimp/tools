@@ -1,0 +1,178 @@
+#!/usr/bin/env perl
+
+use strict;
+use Net::SMTP;
+use Getopt::Long;
+use Email::Simple;
+
+$| = 1;
+
+# option variables
+my @hosts;
+my ($to_addr, $to_name, $from_addr, $from_name, $reply_addr, $returnpath, $subject, $file, $debug, $stop);
+
+# grab command line opts
+GetOptions (
+    'h|hosts=s'       => \@hosts,
+    'rt|returnpath=s' => \$returnpath,
+    't|to=s'          => \$to_addr,
+    'tn|toname=s'     => \$to_name,
+    'f|from=s'        => \$from_addr,
+    'fn|fromname=s'   => \$from_name,
+    'r|reply=s'       => \$reply_addr,
+    's|subject=s'     => \$subject,
+    'file=s'          => \$file,
+    'd|debug'         => \$debug,
+    'stop=s'            => \$stop
+);
+
+# option defaults
+$to_addr  = "noreply\@bluehornet.com" if (!defined($to_addr));
+$to_name = $to_addr if (!defined($to_name));
+$from_addr = "noreply\@bluehornet.com" if (!defined($from_addr));
+$from_name = "Automated Mailer" if (!defined($from_name));
+$reply_addr = "noreply\@bluehornet.com" if (!defined($reply_addr));
+$subject = "Automated Test Message" if (!defined($subject));
+$returnpath = $from_addr if (!defined($returnpath));
+$debug = (defined($debug)) ? 1 : 0;
+
+if (!@hosts) {
+    print "No hosts specified!\n";
+    exit;
+}
+
+my $localhost = `hostname -s`;
+chomp($localhost);
+
+my $headers = "Return-Path: %%RETURN_PATH%%\r\n" .
+              "From: \"%%FROM_NAME%%\" <%%FROM_ADDR%%>\r\n" .
+              "Reply-To: %%REPLY_ADDR%%\r\n" .
+              "To: \"%%TO_NAME%%\" <%%TO_ADDR%%>\r\n" .
+              "Subject: %%SUBJECT%%\r\n" .
+              "Mime-Version: 1.0\r\n" .
+              "Content-Type: multipart/alternative;\r\n" .
+              "    boundary=\"%%MIME_BOUNDARY%%\"\r\n\r\n" .
+              "--%%MIME_BOUNDARY%%\r\n" .
+              "Content-Type: text/plain; charset=\"utf-8\"\r\n" .
+              "Content-Disposition: inline\r\n\r\n";
+
+my $content = <<EOF;
+Duis aenean lacus voluptatem sit sagittis fusce, ac nec pede ut wisi.
+
+Nisl quis donec suscipit aliquet non, lacus ut, enim mi magna turpis, non sed quam vel id, vestibulum donec fermentum accumsan. Id nonummy nunc accumsan congue, risus integer velit dolor neque mattis. Sociis vel duis tristique sit, vel porttitor nulla dictumst, est et lacinia, amet risus hymenaeos consequat nulla tempus. Nunc augue luctus viverra id ut, volutpat dui natoque, a necessitatibus sem eget integer tincidunt amet.
+
+Scelerisque vulputate a sit dui, ad metus, parturient mauris etiam nunc vehicula morbi id, tempus turpis nonummy purus, torquent nunc at nibh quis. Nunc aliquam, aenean wisi sit ante, porta luctus ut neque sem sit fusce. Nunc augue luctus viverra id ut, volutpat dui natoque, a necessitatibus sem eget integer tincidunt amet. Posuere malesuada vestibulum nec mus mauris nonummy, ultricies ut cras, lacinia massa, aenean quam vel lacinia phasellus, lacinia eget pede a dictum ante.
+
+Arcu in aliquam aliquam tempus, tempus at senectus amet, sed faucibus sit donec, a suscipit egestas fringilla nunc. Arcu in aliquam aliquam tempus, tempus at senectus amet, sed faucibus sit donec, a suscipit egestas fringilla nunc. Ut fringilla tortor pharetra, diam pharetra dolor vehicula nostra erat massa. Libero explicabo dictum interdum, nulla sed a scelerisque vitae nec lectus.
+
+Neque dolore tortor massa iste, tempus orci ut blandit, tempor nisl non cras, vitae consectetuer id. Eu sollicitudin. Phasellus arcu in, nulla feugiat non netus facilisi, ornare vitae gravida. Donec luctus porttitor.
+
+Pretium volutpat arcu praesent hac, fames eget venenatis ligula euismod nunc quis. Rhoncus pellentesque etiam quis sapien sed, vestibulum luctus arcu ridiculus at, pellentesque ipsum velit, posuere sed porttitor in consectetuer, sed tincidunt sagittis blandit ullamcorper ut vitae.
+EOF
+
+my $footer = "\n\n--%%MIME_BOUNDARY%%--\n";
+my $OUT = $headers . $content . $footer;
+
+# perform tilde expansion for filename
+# read content from file (assumes headers are present)
+# grab SMTP transaction data from message as well
+if (defined($file) && $file) {
+    $file =~ s/^~/$ENV{'HOME'}/;
+    if (defined($file) && -e $file) {
+        open(FH, $file);
+        my @lines = <FH>;
+        $OUT = join '', @lines;
+        
+        # parse header data
+        my $email = Email::Simple->new($OUT);
+        
+        my $addr = $email->header("From");
+        my @parts = split(/ /, $addr);
+        if (scalar(@parts) > 1) {
+            $from_addr = $parts[1];
+        } else {
+            $from_addr = $parts[0];
+        }
+        
+        $addr = $email->header("To");
+        @parts = split(/ /, $addr);
+        if (scalar(@parts) > 1) {
+            $to_addr = $parts[1];
+        } else {
+            $to_addr = $parts[0];
+        }
+    }
+}
+
+# Generate a MIME boundary
+# sample MIME boundary
+# --47389cece77de-MultiPart-Mime-Boundary
+my ($id, $i, $j, $mime_boundary);
+for($i = 0; $i < 13;) {
+    $j = chr(int(rand(127)));
+    if($j =~ /[a-zA-Z0-9]/) {
+        $id .= $j;
+        $i++;
+    }
+}
+$mime_boundary = "--$id-MultiPart-Mime-Boundary";
+
+# compile message content
+
+# replace tags in content
+$OUT =~ s/%%RETURN_PATH%%/$returnpath/g;
+$OUT =~ s/%%FROM_NAME%%/$from_name/g;
+$OUT =~ s/%%FROM_ADDR%%/$from_addr/g;
+$OUT =~ s/%%REPLY_ADDR%%/$reply_addr/g;
+$OUT =~ s/%%TO_NAME%%/$to_name/g;
+$OUT =~ s/%%TO_ADDR%%/$to_addr/g;
+$OUT =~ s/%%SUBJECT%%/$subject/g;
+$OUT =~ s/%%MIME_BOUNDARY%%/$mime_boundary/g;
+$OUT =~ s/%%HOSTNAME%%/$localhost/g;
+
+#print $OUT . "\n\n"; exit;
+
+my $smtp;
+foreach (@hosts) {
+    my $host = $_;
+    $smtp = Net::SMTP->new($host, Timeout => 45, Debug => 0, Hello => $localhost) or die "[$host] Failed to connect: $!\n";
+
+    if ($debug && $stop eq "banner") {
+        print $smtp->banner;
+        print $smtp->message;
+        $smtp->quit();
+        print $smtp->message;
+        exit;
+    }
+
+    $smtp->mail($returnpath) or die "[$host] Failed MAIL FROM: $!\n";
+    $smtp->to($to_addr) or die "[$host] Failed RCPT TO: $!\n";
+
+    if ($debug && $stop eq "rcpt") {
+        print $smtp->message;
+        $smtp->quit();
+        print $smtp->message;
+        exit;
+    }
+
+    $smtp->data() or die "[$host] Failed DATA: $!\n";
+    $smtp->datasend("$OUT") or die "[$host] Failed DATA send: $!\n";
+    $smtp->datasend("\n") or die "[$host] Failed DATA newline: $!\n";
+    $smtp->dataend() or die "[$host] Failed DATA end: $!\n";
+    my $message = $smtp->message;
+    $smtp->quit() or die "[$host] Failed QUIT: $!\n";
+    
+    if ($debug) {
+        # if we're here, we ought to have a valid OK
+        my $out = "??";
+        if ($message =~ m/^.* OK (.*)$/im) {
+            $out = $1;
+        }
+        print "$out\n";
+    } else {
+        print '.';
+    }
+}
+
+print "\n" if (!$debug);
+exit;
