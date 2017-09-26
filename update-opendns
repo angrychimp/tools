@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# requires that the aws cli be installed
+# requires that the "randack" AWS profile be configured in ~/.aws/credentials
+
+curl -s -u "$(AWS_PROFILE=randack aws ssm get-parameter --with-decryption --name opendns_auth --query "Parameter.Value" --output text)" https://updates.opendns.com/nic/update?hostname=Home

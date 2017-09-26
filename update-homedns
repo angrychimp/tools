@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# Update DNS for home IP address
+# $1 == hostname to update
+# $2 == password for authentication
+
+curl -s \
+	--data-urlencode "passwd=$2" \
+	--data-urlencode "host=$1" \
+	--data-urlencode "comment=Update for $(date +%Y-%m-%d)" \
+	https://angrychimp.net/code/dyndns.php
