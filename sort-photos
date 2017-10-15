@@ -4,4 +4,5 @@ if [[ ! -e ~/repos/sortphotos/src/sortphotos.py ]]; then
 	ehco "sortphotos script not found"
 fi
 
+find /media/pi/STORAGE/Dropbox/ -type f -name '.*' -print0 | xargs -r0 rm
 python ~/repos/sortphotos/src/sortphotos.py -r -s /media/pi/STORAGE/Dropbox/ /media/pi/STORAGE/Photos/
