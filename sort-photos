@@ -1,0 +1,7 @@
+#!/bin/bash
+
+if [[ ! -e ~/repos/sortphotos/src/sortphotos.py ]]; then
+	ehco "sortphotos script not found"
+fi
+
+python ~/repos/sortphotos/src/sortphotos.py -r -s /media/pi/STORAGE/Dropbox/ /media/pi/STORAGE/Photos/
