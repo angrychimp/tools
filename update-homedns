@@ -8,7 +8,7 @@ date
 
 passwd=$2
 if [[ -z $passwd ]]; then
-	passwd=$(AWS_PROFILE=randack aws ssm get-parameter --with-decryption --name dh-dns-auth --query "Parameter.Value" --output text)
+	passwd=$(aws ssm get-parameter --with-decryption --name dh-dns-auth --query "Parameter.Value" --output text)
 fi
 
 curl -s \
