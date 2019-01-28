@@ -1,20 +1,32 @@
 #!/bin/bash
 
 # Update DNS for home IP address
-# $1 == hostname to update
-# $2 == password for authentication
+# $1 == domain name
+# $2 == record to update
 
 date
 
-passwd=$2
-if [[ -z $passwd ]]; then
-	passwd=$(aws ssm get-parameter --with-decryption --name dh-dns-auth --query "Parameter.Value" --output text)
+domain=$1
+record=$2
+
+if [[ -z $domain || -z $record ]]; then
+	echo "Domain/record are required"
+	exit
 fi
 
-curl -s \
-	--data-urlencode "passwd=$passwd" \
-	--data-urlencode "host=$1" \
-	--data-urlencode "comment=Update for $(date +%Y-%m-%d)" \
-	https://angrychimp.net/code/dyndns.php
+myip=$(curl -s ifconfig.co)
+current=$(dig +noall +answer in A $record.$domain | awk '{print $NF}')
+
+if [[ $current == $myip ]]; then
+	echo "Record is current"
+	[[ "$FORCEUPDATE" == "true" ]] || exit
+fi
+
+zoneid=$(aws route53 list-hosted-zones --query "HostedZones[?Name == '$domain.'].Id" --output text | cut -d'/' -f3)
+
+echo "$zoneid / $record => $myip"
+
+aws route53 change-resource-record-sets --hosted-zone-id $zoneid \
+	--change-batch "{\"Comment\": \"Home IP udpate for $(date)\", \"Changes\":[{\"Action\": \"UPSERT\",\"ResourceRecordSet\":{\"Name\":\"$record.$domain\", \"Type\": \"A\", \"TTL\": 3600, \"ResourceRecords\":[{\"Value\": \"$myip\"}]}}]}"
 
 echo
