@@ -5,6 +5,7 @@
 # $2 == record to update
 
 date
+source $(dirname $0)/venv/bin/activate
 
 domain=$1
 record=$2
@@ -18,7 +19,7 @@ myip=$(curl -s ifconfig.co)
 current=$(dig +noall +answer in A $record.$domain | awk '{print $NF}')
 
 if [[ $current == $myip ]]; then
-	echo "Record is current"
+	echo "Record is current ($myip == $current)"
 	[[ "$FORCEUPDATE" == "true" ]] || exit
 fi
 
